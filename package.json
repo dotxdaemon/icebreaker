@@ -1,0 +1,11 @@
+{
+  "name": "icebreaker",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node scripts/test.js",
+    "lint": "node scripts/lint.js",
+    "typecheck": "node scripts/typecheck.js"
+  }
+}
