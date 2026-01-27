@@ -5,3 +5,4 @@
 - Design: Off-white background (#f4f4f0), dark text (#1a1a1a), outline buttons with simple hover, large typography, ample whitespace, Inter font.
 - UX: Centered question, Next button chooses random from fetched array, Add reveals input; submit writes to Firestore and alerts, then hides input.
 - Testing: Use npm scripts (test/lint/typecheck) to validate file existence and required structure/content since no framework is present.
+- Added firebase-setup.md with Firebase project, Firestore, rules, and config placeholder steps for the icebreaker page.
