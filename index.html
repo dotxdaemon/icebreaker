@@ -125,6 +125,7 @@
         getDocs,
         addDoc,
       } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
+      import { createQuestionQueue } from './question-queue.js';
 
       const firebaseConfig = {
         apiKey: 'AIzaSyDrfolJCLUeizZkkAOACygxRcV9Kv1Weds',
@@ -147,15 +148,30 @@
       const input = document.getElementById('input');
 
       let questions = [];
+      const questionQueue = createQuestionQueue();
+
+      const shuffleQuestions = (items) => {
+        const shuffled = [...items];
+
+        for (let index = shuffled.length - 1; index > 0; index -= 1) {
+          const swapIndex = Math.floor(Math.random() * (index + 1));
+          [shuffled[index], shuffled[swapIndex]] = [
+            shuffled[swapIndex],
+            shuffled[index],
+          ];
+        }
+
+        return shuffled;
+      };
 
       const pickRandomQuestion = () => {
-        if (questions.length === 0) {
+        const nextQuestion = questionQueue.next();
+        if (!nextQuestion) {
           questionEl.textContent = 'No questions yet. Add the first one!';
           return;
         }
 
-        const index = Math.floor(Math.random() * questions.length);
-        questionEl.textContent = questions[index];
+        questionEl.textContent = nextQuestion;
       };
 
       const loadQuestions = async () => {
@@ -164,6 +180,7 @@
           questions = snapshot.docs
             .map((doc) => doc.data()?.text)
             .filter((text) => typeof text === 'string');
+          questionQueue.setQuestions(shuffleQuestions(questions));
           pickRandomQuestion();
         } catch (error) {
           questionEl.textContent = 'Unable to load questions right now.';
@@ -193,6 +210,7 @@
         try {
           await addDoc(questionsCollection, { text: value });
           questions = [...questions, value];
+          questionQueue.addQuestion(value);
           input.value = '';
           form.classList.remove('active');
           alert('Question added.');

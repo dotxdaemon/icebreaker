@@ -6,3 +6,4 @@
 - UX: Centered question, Next button chooses random from fetched array, Add reveals input; submit writes to Firestore and alerts, then hides input.
 - Testing: Use npm scripts (test/lint/typecheck) to validate file existence and required structure/content since no framework is present.
 - Added firebase-setup.md with Firebase project, Firestore, rules, and config placeholder steps for the icebreaker page.
+- Added a question queue module to rotate icebreaker questions without immediate repeats.
