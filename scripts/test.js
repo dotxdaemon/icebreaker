@@ -1,6 +1,7 @@
 // ABOUTME: Validates the icebreaker HTML structure and JS behavior hooks.
 // ABOUTME: Ensures required UI elements and Firestore wiring are present.
 import { readFileSync, existsSync } from 'node:fs';
+import { createQuestionQueue } from '../question-queue.js';
 
 const filePath = new URL('../index.html', import.meta.url);
 
@@ -34,3 +35,32 @@ if (missing.length > 0) {
 }
 
 console.log('Basic structure checks passed.');
+
+const queue = createQuestionQueue(['A', 'B', 'C']);
+const first = queue.next();
+const second = queue.next();
+const third = queue.next();
+const fourth = queue.next();
+
+if (!first || !second || !third) {
+  console.error('Question queue did not return expected values.');
+  process.exit(1);
+}
+
+if (new Set([first, second, third]).size !== 3) {
+  console.error('Question queue repeated before cycling.');
+  process.exit(1);
+}
+
+if (fourth !== first) {
+  console.error('Question queue did not cycle as expected.');
+  process.exit(1);
+}
+
+const addQueue = createQuestionQueue(['X', 'Y']);
+addQueue.addQuestion('Z');
+
+if (addQueue.next() !== 'X' || addQueue.next() !== 'Y' || addQueue.next() !== 'Z') {
+  console.error('Question queue did not keep added questions at the end.');
+  process.exit(1);
+}
