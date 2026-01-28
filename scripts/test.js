@@ -25,6 +25,10 @@ const requiredSnippets = [
   'collection',
   'Next',
   'Add',
+  'gap: 1.5rem',
+  'padding: 1rem 2.5rem',
+  'min-width: 140px',
+  'min-height: 52px',
 ];
 
 const missing = requiredSnippets.filter((snippet) => !contents.includes(snippet));
