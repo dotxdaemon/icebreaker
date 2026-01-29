@@ -16,6 +16,7 @@ const requiredSnippets = [
   'id="question"',
   'id="next"',
   'id="add"',
+  'id="theme-toggle"',
   'id="form"',
   'id="input"',
   'id="submit"',
@@ -25,10 +26,13 @@ const requiredSnippets = [
   'collection',
   'Next',
   'Add',
-  'gap: 1.5rem',
-  'padding: 1rem 2.5rem',
-  'min-width: 140px',
-  'min-height: 52px',
+  'data-theme',
+  'theme-color',
+  'localStorage',
+  'max-width: 720px',
+  'min-height: 44px',
+  'prefers-reduced-motion',
+  'translateY',
 ];
 
 const missing = requiredSnippets.filter((snippet) => !contents.includes(snippet));
