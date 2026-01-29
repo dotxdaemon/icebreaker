@@ -8,3 +8,7 @@
 - Added firebase-setup.md with Firebase project, Firestore, rules, and config placeholder steps for the icebreaker page.
 - Added a question queue module to rotate icebreaker questions without immediate repeats.
 - 2025-09-19: Tracked work to enlarge the Next/Add buttons by increasing spacing and minimum tap targets, plus a test check for the updated button sizing.
+
+- 2025-09-19: Starting UI updates for card layout, theme toggle, button hierarchy, and question animation in index.html with test updates.
+
+- 2025-09-19: Added themed card layout, button hierarchy styles, theme toggle logic, and question transition in index.html; updated tests for new UI hooks.
