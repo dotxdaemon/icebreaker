@@ -1,0 +1,12 @@
+1) Why is it saying “Unable to save your feedback right now” when pressing Like?
+Because the Firestore write request is being blocked on the client (ERR_BLOCKED_BY_CLIENT), which typically means an ad/privacy blocker or network filter is blocking calls to firestore.googleapis.com.
+
+2) How do I fix it?
+Disable the blocker for the site or allowlist firestore.googleapis.com, then reload and try again. If that works in an incognito/private window with extensions disabled, the blocker is the root cause. If you are on a managed network, check DNS/firewall rules that may block Firestore.
+
+3) How do I route writes through my own backend instead of calling Firestore from the browser?
+- Create a backend endpoint you control (e.g., Firebase Cloud Function or your own server) that accepts a vote payload (questionId, vote, deviceId).
+- In that backend, use the Firebase Admin SDK to write the vote to Firestore (the Admin SDK runs server-side and is not blocked by client extensions).
+- Update the frontend to call your endpoint with fetch(), and remove the direct Firestore write for votes.
+- Lock down Firestore rules so clients can no longer write votes directly; only the backend service account should write.
+- Deploy the backend and update the frontend URL to point to it.
