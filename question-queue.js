@@ -1,23 +1,45 @@
 // ABOUTME: Provides queue-based ordering for icebreaker questions.
 // ABOUTME: Ensures questions rotate to the end after being shown.
 export const createQuestionQueue = (initialQuestions = []) => {
-  let queue = [...initialQuestions];
+  const normalizeQuestion = (question) => {
+    if (typeof question === 'string') {
+      const trimmed = question.trim();
+      return trimmed ? trimmed : null;
+    }
+
+    if (question && typeof question === 'object') {
+      const text = question.text;
+      if (typeof text !== 'string') {
+        return null;
+      }
+
+      const trimmed = text.trim();
+      if (!trimmed) {
+        return null;
+      }
+
+      return {
+        ...question,
+        text: trimmed,
+      };
+    }
+
+    return null;
+  };
+
+  let queue = initialQuestions.map(normalizeQuestion).filter(Boolean);
 
   const setQuestions = (questions = []) => {
-    queue = [...questions];
+    queue = questions.map(normalizeQuestion).filter(Boolean);
   };
 
   const addQuestion = (question) => {
-    if (typeof question !== 'string') {
+    const normalized = normalizeQuestion(question);
+    if (!normalized) {
       return;
     }
 
-    const trimmed = question.trim();
-    if (!trimmed) {
-      return;
-    }
-
-    queue.push(trimmed);
+    queue.push(normalized);
   };
 
   const next = () => {
