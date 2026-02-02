@@ -20,20 +20,12 @@ const requiredSnippets = [
   'id="form"',
   'id="input"',
   'id="submit"',
-  'id="like"',
-  'id="dislike"',
   'questions',
-  'questionVotes',
   'getDocs',
   'addDoc',
-  'setDoc',
-  'doc(',
-  'serverTimestamp',
   'collection',
   'Next',
   'Add',
-  'Like',
-  'Dislike',
   'data-theme',
   'theme-color',
   'localStorage',
@@ -44,9 +36,16 @@ const requiredSnippets = [
 ];
 
 const missing = requiredSnippets.filter((snippet) => !contents.includes(snippet));
+const removedSnippets = ['id="like"', 'id="dislike"', 'Like', 'Dislike'];
+const stillPresent = removedSnippets.filter((snippet) => contents.includes(snippet));
 
 if (missing.length > 0) {
   console.error(`Missing required snippets: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
+if (stillPresent.length > 0) {
+  console.error(`Removed snippets are still present: ${stillPresent.join(', ')}`);
   process.exit(1);
 }
 
