@@ -226,6 +226,12 @@
           <button id="next" class="button primary" type="button">Next</button>
           <button id="add" class="button secondary" type="button">Add</button>
         </div>
+        <div class="actions">
+          <button id="like" class="button secondary" type="button">Like</button>
+          <button id="dislike" class="button secondary" type="button">
+            Dislike
+          </button>
+        </div>
         <form id="form">
           <input
             id="input"
@@ -247,6 +253,9 @@
         collection,
         getDocs,
         addDoc,
+        doc,
+        setDoc,
+        serverTimestamp,
       } from 'https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js';
       import { createQuestionQueue } from './question-queue.js';
 
@@ -267,6 +276,8 @@
       const questionEl = document.getElementById('question');
       const nextButton = document.getElementById('next');
       const addButton = document.getElementById('add');
+      const likeButton = document.getElementById('like');
+      const dislikeButton = document.getElementById('dislike');
       const form = document.getElementById('form');
       const input = document.getElementById('input');
       const themeToggle = document.getElementById('theme-toggle');
@@ -275,6 +286,45 @@
       let questions = [];
       const questionQueue = createQuestionQueue();
       let questionAnimation = null;
+      let currentQuestion = null;
+
+      const votesStorageKey = 'questionVotes';
+      const deviceIdKey = 'questionDeviceId';
+
+      const getStoredVotes = () => {
+        const stored = localStorage.getItem(votesStorageKey);
+        if (!stored) {
+          return {};
+        }
+
+        try {
+          const parsed = JSON.parse(stored);
+          return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (error) {
+          return {};
+        }
+      };
+
+      const storeVotes = (votes) => {
+        localStorage.setItem(votesStorageKey, JSON.stringify(votes));
+      };
+
+      const getDeviceId = () => {
+        const stored = localStorage.getItem(deviceIdKey);
+        if (stored) {
+          return stored;
+        }
+
+        const generated =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        localStorage.setItem(deviceIdKey, generated);
+        return generated;
+      };
+
+      let storedVotes = getStoredVotes();
+      const deviceId = getDeviceId();
 
       const themeColors = {
         light: '#f4f4f0',
@@ -351,24 +401,80 @@
         return shuffled;
       };
 
+      const getQuestionText = (question) =>
+        typeof question === 'string' ? question : question?.text;
+
+      const getQuestionId = (question) =>
+        question && typeof question === 'object' ? question.id : null;
+
+      const updateVoteButtons = () => {
+        if (!likeButton || !dislikeButton) {
+          return;
+        }
+
+        const questionId = getQuestionId(currentQuestion);
+        const storedVote = questionId ? storedVotes[questionId] : null;
+        const shouldDisable = !questionId || Boolean(storedVote);
+        likeButton.disabled = shouldDisable;
+        dislikeButton.disabled = shouldDisable;
+      };
+
       const pickRandomQuestion = () => {
         const nextQuestion = questionQueue.next();
-        if (!nextQuestion) {
+        const nextText = getQuestionText(nextQuestion);
+        if (!nextText) {
           questionEl.textContent = 'No questions yet. Add the first one!';
+          currentQuestion = null;
+          updateVoteButtons();
           animateQuestion();
           return;
         }
 
-        questionEl.textContent = nextQuestion;
+        currentQuestion =
+          nextQuestion && typeof nextQuestion === 'object' ? nextQuestion : null;
+        questionEl.textContent = nextText;
+        updateVoteButtons();
         animateQuestion();
+      };
+
+      const recordVote = async (vote) => {
+        const questionId = getQuestionId(currentQuestion);
+        if (!questionId) {
+          return;
+        }
+
+        const voteId = `${questionId}-${deviceId}`;
+
+        try {
+          await setDoc(doc(db, 'questionVotes', voteId), {
+            questionId,
+            vote,
+            voterId: deviceId,
+            createdAt: serverTimestamp(),
+          });
+          storedVotes = {
+            ...storedVotes,
+            [questionId]: vote,
+          };
+          storeVotes(storedVotes);
+          updateVoteButtons();
+        } catch (error) {
+          alert('Unable to save your feedback right now.');
+        }
       };
 
       const loadQuestions = async () => {
         try {
           const snapshot = await getDocs(questionsCollection);
           questions = snapshot.docs
-            .map((doc) => doc.data()?.text)
-            .filter((text) => typeof text === 'string');
+            .map((docSnap) => {
+              const data = docSnap.data();
+              return {
+                id: docSnap.id,
+                text: data?.text,
+              };
+            })
+            .filter((question) => typeof question.text === 'string');
           questionQueue.setQuestions(shuffleQuestions(questions));
           pickRandomQuestion();
         } catch (error) {
@@ -387,6 +493,14 @@
         }
       });
 
+      likeButton.addEventListener('click', () => {
+        recordVote('like');
+      });
+
+      dislikeButton.addEventListener('click', () => {
+        recordVote('dislike');
+      });
+
       form.addEventListener('submit', async (event) => {
         event.preventDefault();
         const value = input.value.trim();
@@ -397,9 +511,10 @@
         }
 
         try {
-          await addDoc(questionsCollection, { text: value });
-          questions = [...questions, value];
-          questionQueue.addQuestion(value);
+          const docRef = await addDoc(questionsCollection, { text: value });
+          const question = { id: docRef.id, text: value };
+          questions = [...questions, question];
+          questionQueue.addQuestion(question);
           input.value = '';
           form.classList.remove('active');
           alert('Question added.');
@@ -419,6 +534,7 @@
         applyTheme(nextTheme);
       });
 
+      updateVoteButtons();
       loadQuestions();
     </script>
   </body>
