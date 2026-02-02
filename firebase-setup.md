@@ -50,6 +50,14 @@ service cloud.firestore {
     match /questions/{document} {
       allow read, write: if true;
     }
+    match /questionVotes/{voteId} {
+      allow create: if request.resource.data.keys().hasOnly(['questionId', 'vote', 'voterId', 'createdAt'])
+        && request.resource.data.questionId is string
+        && request.resource.data.voterId is string
+        && request.resource.data.vote in ['like', 'dislike']
+        && request.resource.data.createdAt is timestamp
+        && request.resource.id == request.resource.data.questionId + '-' + request.resource.data.voterId;
+    }
   }
 }
 ```
