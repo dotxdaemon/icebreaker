@@ -13,3 +13,4 @@
 
 - 2025-09-19: Added themed card layout, button hierarchy styles, theme toggle logic, and question transition in index.html; updated tests for new UI hooks.
 - 2025-09-19: Added like/dislike voting flow with anonymous device IDs stored locally, Firestore vote writes, and UI buttons for feedback.
+- 2025-09-19: Added answers.txt documenting the Firestore like-button error cause and mitigation steps.
