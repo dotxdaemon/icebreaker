@@ -235,3 +235,29 @@ Safety and guardrails
 - Do not introduce secrets, keys, trackers, or telemetry.
 - Do not remove accessibility features; add focus states and reduced-motion behavior when relevant and consistent with requirements.
 - Do not degrade performance via large assets or heavy runtime effects unless the user explicitly wants it.
+
+Additional execution requirements
+- Do not use binary files.
+- If there are existing uncommitted or untracked changes in the repo before you begin, ignore them and continue.
+- Return a screenshot showing that your changes were successful. If you cannot, rerun until the code is valid.
+
+Required verification commands
+- `npm test`
+- `npm run lint`
+- `npm run typecheck`
+
+Verification loop rules
+- If a command fails, fix the cause, then rerun the same command.
+- Keep changes minimal. No refactors unless required to pass verification.
+- In the final message, list the exact commands you ran.
+
+Hard finish line
+- All verification commands in AGENTS.md must pass with exit code 0.
+
+Required process
+- Run the verification commands first to get a baseline.
+- Iterate: change code → rerun the failing command(s) → repeat.
+- Do not stop early. Do not say done until verification passes.
+- Final response must include what changed and the exact commands run.
+- Do not add text unless explicitly requested.
+- Do not complete until tests are done, the prompt has been re-read and re-tested, and the screenshot shows cleanly.
